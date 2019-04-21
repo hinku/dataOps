@@ -4,8 +4,9 @@ Created on 2019年4月13日
 @author: Administrator
 '''
 import xlwings as xw
-from dataOps import dictOps
-from dataOps.updateOps import UpdateOps
+from .updateOps import UpdateOps
+from . import dictOps
+
 
 
 
@@ -50,8 +51,8 @@ def getFormulaFromExcel(wb, sheetName, rowStartPos = 'A1'):
     sheet = wb.sheets[sheetName]
     datas = sheet.range(rowStartPos).expand(mode='right')
     values = datas.value
-    formulas = datas.formula
-
+    formulas = datas.formula[0]
+    
     retFormula = []
     for i, v in enumerate(values):
         #如果同个单元格的获取到的value和formula不一致，说明该单元格为公式，记录下公式，否则记录为None

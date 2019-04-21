@@ -5,8 +5,12 @@ Created on 2019年4月13日
 '''
 
 from dataOps.excelOps import ExcelOps
+import os
 if __name__ == '__main__':
-    xls = ExcelOps(r'test1.xlsx', keyName = 'a')
+    #path = os.path.join(os.getcwd(), 'dataOps')
+    path = os.getcwd()
+
+    xls = ExcelOps(os.path.join(path, 'test1.xlsx'), keyName = 'a')
     print(xls.dataDict)
-    xls.merge(r'test2.xlsx', rowStartPos = 'A2')
+    xls.merge(os.path.join(path, 'test2.xlsx'), rowStartPos = 'A2')
     print(xls.dataDict)

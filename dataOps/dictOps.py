@@ -4,7 +4,7 @@ Created on 2019年4月13日
 @author: Administrator
 '''
 
-from dataOps.updateOps import UpdateOps
+from .updateOps import UpdateOps
 
 def update(orig, newData, updateOps = UpdateOps.whileEmpty):
     x = orig.copy()
