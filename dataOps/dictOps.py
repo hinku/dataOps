@@ -47,7 +47,7 @@ if __name__ == '__main__':
 #     {'a': 1, 'b': 3, 'c': 4}
 #===============================================================================
     
-    x = {'a': 1, 'b': 2}
+    x = {'a': 1, 'b': 2, 'c':None}
     y = {'b': 3, 'c': 4}
     
     z = merge(x, y, updateOps = UpdateOps.whileEmpty, joinFlag = False)
