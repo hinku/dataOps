@@ -10,7 +10,7 @@ from . import dictOps
 
 
 
-def excelToDict(wb, sheetName, keyName, startCell = 'A1'):
+def excelToDict(wb, sheetName, keyName, rowStartPos = 'A1'):
     '''
     将Excel指定的Sheet中的所有值转成双层dict保存
     如 keyName为a，数据获取从A1开始
@@ -27,7 +27,7 @@ def excelToDict(wb, sheetName, keyName, startCell = 'A1'):
 
     '''
     sheet = wb.sheets[sheetName]
-    datas = sheet.range(startCell).expand()
+    datas = sheet.range(rowStartPos).expand()
     colNames = datas.value[0]
     print(colNames)
     keyIndexLst = [ i for i, v in enumerate(colNames) if v == keyName ]
@@ -43,13 +43,13 @@ def excelToDict(wb, sheetName, keyName, startCell = 'A1'):
     #print(dataDict)
     return dataDict
 
-def getFormulaFromExcel(wb, sheetName, startCell = 'A2'):
+def getFormulaFromExcel(wb, sheetName, rowStartPos = 'A2'):
     '''
     获取指定sheet中各列的公式，如果不是公式时，该列公式记为None
 
     '''
     sheet = wb.sheets[sheetName]
-    datas = sheet.range(startCell).expand(mode='right')
+    datas = sheet.range(rowStartPos).expand(mode='right')
     values = datas.value
     formulas = datas.formula[0]
     
@@ -73,20 +73,10 @@ class ExcelOps():
     sheetName = None
     dataDict = None
     keyName = None
-    emptyColumnDict = None
+    dataDictValueTmp = None
     formulas = None
-    startCell = None
-
-    def getEmptyColumn(self):
-        colDict = {}
-        for v in self.dataDict.values():
-            for c in v.keys():
-                colDict[c] = None
-            
-            break
-        return colDict
-
-    def __init__(self, file, sheetName = 'sheet1', keyName = None, startCell = 'A1'):
+    colStartRow = None
+    def __init__(self, file, sheetName = 'sheet1', keyName = None, colStartRow = 1):
         '''
         Constructor
         '''
@@ -97,10 +87,11 @@ class ExcelOps():
         self.keyName = keyName
         self.dataDict = excelToDict(self.wb, self.sheetName, keyName)
         self.formulas = getFormulaFromExcel(self.wb, sheetName, 'A2')
-        self.startCell = self.sheet.range(startCell)
+        self.colStartRow = colStartRow
         #获取目的文件列格式
-        self.emptyColumnDict = self.getEmptyColumn()
-
+        for v in self.dataDict.values():
+            self.dataDictValueTmp = v.copy()
+            break
      
     #析构操作
     def __del__(self):
@@ -119,9 +110,9 @@ class ExcelOps():
         values = []
         for v in self.dataDict.values():
             #print(v)
-            values.append(list(v.values()))
+            values.append([k for k in v.values()])
         
-        valueStartRow = self.startCell.row + 1
+        valueStartRow = self.colStartRow + 1
         valueEndRow = valueStartRow + len(values) - 1
         self.sheet.range('A' + str(valueStartRow)).value = values
         
@@ -135,21 +126,21 @@ class ExcelOps():
         
     
     #将
-    def merge(self, *newFile, sheet = 0, startCell = 'A1'):
+    def merge(self, *newFile, rowStartPos = 'A1'):
         '''
         将新制定的文件，将源文件有的且新文件也有的字段更新到源文件中；如果新文件中的记录在源文件中不存在，追加进去
         '''
         for file in newFile:
             wb = self.app.books.open(file)
-            newDataDict = excelToDict(wb, 0, self.keyName, startCell)
+            newDataDict = excelToDict(wb, 0, self.keyName, rowStartPos)
             wb.close()
-            for k, newData in newDataDict.items():
+            for k, data in newDataDict.items():
                 updateOps = UpdateOps.whileEmpty
                 origData = self.dataDict.get(k)
                 #如果文件中没有该条记录，需要将记录合并到文件，内容直接覆盖
                 if origData is None:
-                    origData = self.emptyColumnDict.copy()
+                    origData = self.dataDictValueTmp
                     updateOps = UpdateOps.override
                     
-                self.dataDict[k] = dictOps.merge(origData, newData, updateOps)
+                self.dataDict[k] = dictOps.merge(origData, data, updateOps)
             

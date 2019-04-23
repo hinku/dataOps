@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     xls = ExcelOps(os.path.join(path, 'test1.xlsx'), keyName = 'a')
     print(xls.dataDict)
-    xls.merge(os.path.join(path, 'test2.xlsx'), startCell = 'A2')
+    xls.merge(os.path.join(path, 'test2.xlsx'), rowStartPos = 'A2')
     print(xls.dataDict)
     xls.flush()
         
