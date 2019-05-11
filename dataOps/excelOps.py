@@ -133,8 +133,16 @@ class ExcelOps():
         self.wb.save()
         
     
-    #将
-    def merge(self, *newFile, sheetNameOrIndex = 0, startCell = 'A1'):
+    def __splitTwoDict(self, data, splitKeys):
+        '''
+        将一个Dict数据分割成两部分，在splitKeys中的，放入到splited中，其他的留在orig
+        返回结果为：orig, spilted
+        '''
+        orig = data.copy()
+        spilted = { k:orig.pop(k) for k in splitKeys if orig.get(k) }
+        return orig, spilted
+
+    def merge(self, *newFile, sheetNameOrIndex = 0, startCell = 'A1', forceOverWriteCols = None):
         '''
         将新制定的文件，将源文件有的且新文件也有的字段更新到源文件中；如果新文件中的记录在源文件中不存在，追加进去
         '''
@@ -144,12 +152,17 @@ class ExcelOps():
             wb.close()
             columns = self.getEmptyColumn()
             for k, newData in newDataDict.items():
-                updateOps = UpdateOps.whileEmpty
                 origData = self.dataDict.get(k)
-                #如果文件中没有该条记录，需要将记录合并到文件，内容直接覆盖
+        
                 if origData is None:
-                    origData = columns.copy()
-                    updateOps = UpdateOps.override
-                    
-                self.dataDict[k] = dictOps.merge(origData, newData, updateOps)
+                    #如果文件中没有该条记录，需要将记录合并到文件，内容直接覆盖
+                    self.dataDict[k] = dictOps.merge(columns.copy(), newData, UpdateOps.override)
+                elif forceOverWriteCols and len(forceOverWriteCols) > 0:
+                    #如果指定某些列强制覆盖，则将数据拆为两部分，不强制覆盖的继续使用为空时更新，强制覆盖的列直接覆盖
+                    notForceOverwrite, forceOverwrite = self.__splitTwoDict(newData, forceOverWriteCols)
+                    self.dataDict[k] = dictOps.merge(origData, notForceOverwrite, UpdateOps.whileEmpty)
+                    #dataDict[k]的数据已经更新，重新合并前需要从新取数据
+                    self.dataDict[k] = dictOps.merge(self.dataDict.get(k), forceOverwrite, UpdateOps.override)
+                else:
+                    self.dataDict[k] = dictOps.merge(origData, newData, UpdateOps.override)
             

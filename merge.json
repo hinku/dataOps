@@ -1,0 +1,10 @@
+{
+    "dstFile":"test1.xlsx",
+    "dtsFileSheet":0,
+    "dtsFileStartCell":"A1",
+    "srcFile":"test2.xlsx",
+    "srcFileSheet":0,
+    "srcFileStartCell":"A2",
+    "keyName":"a",
+    "forceOverWriteCols":["d","c"]
+}
