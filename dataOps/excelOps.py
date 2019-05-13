@@ -32,7 +32,7 @@ def excelToDict(wb, sheetNameOrIndex, keyName, startCell = 'A1'):
     colNames = datas.value[0]
     print(colNames)
     keyIndexLst = [ i for i, v in enumerate(colNames) if v == keyName ]
-    if keyIndexLst is None or len(keyIndexLst) == 0:
+    if not keyIndexLst:
         print('has no col Named: %s' % keyName)
         return None
     keyIndex = keyIndexLst[0]
@@ -157,7 +157,7 @@ class ExcelOps():
                 if origData is None:
                     #如果文件中没有该条记录，需要将记录合并到文件，内容直接覆盖
                     self.dataDict[k] = dictOps.merge(columns.copy(), newData, UpdateOps.override)
-                elif forceOverWriteCols and len(forceOverWriteCols) > 0:
+                elif forceOverWriteCols:
                     #如果指定某些列强制覆盖，则将数据拆为两部分，不强制覆盖的继续使用为空时更新，强制覆盖的列直接覆盖
                     notForceOverwrite, forceOverwrite = self.__splitTwoDict(newData, forceOverWriteCols)
                     self.dataDict[k] = dictOps.merge(origData, notForceOverwrite, UpdateOps.whileEmpty)
