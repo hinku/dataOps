@@ -1,15 +1,10 @@
 from pptx import Presentation
 
 prs = Presentation('E:\\test.pptx')
-slides = prs.slides
-
-for slide in slides:
-    print('silde: %s', slide)
+for slide in prs.slides:
     for shape in slide.shapes:
-        if shape.shape_type == 19:
-            table = shape
-            for row in table.table.rows:
-                for cell in row.cells:
-                    print(cell.text_frame.text, end='\t')
+        if not shape.has_table:
+            continue
 
-                print('')
+        a = [ [ cell.text for cell in row.cells ] for row in shape.table.rows ]
+        print(a)
